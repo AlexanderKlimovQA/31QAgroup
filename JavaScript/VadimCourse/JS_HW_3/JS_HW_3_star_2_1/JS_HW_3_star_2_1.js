@@ -1,7 +1,10 @@
+//  Реализуйте считывание из JSONки из файла task2.json с помощью, например, модуля fs. для дальнейшего использования в функции, описанной в задании
+
+
 const fs = require('fs');
 
-let users_info = JSON.parse(fs.readFileSync('C:/Users/PC/Testing/group_30_free/JavaScript/JS_HW_3/JS_HW_3_star_2_1/task2.json'));
-console.log(users_info);
+let users_info = JSON.parse(fs.readFileSync('C:/Users/PC/Testing/group_30_free/JavaScript/JS_HW_3/JS_HW_3_star_2_1/task2.json')); // Путь тут меняется в зависимости от навзания папок, т.ч. для воспроизведения
+console.log(users_info);                                                                                                          // надо подогнать путь в этой строке.
 
 
       // Первый способ

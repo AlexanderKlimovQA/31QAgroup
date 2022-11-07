@@ -1,3 +1,6 @@
+// Написать функцию, которая проверяет, является ли слово палиндромом. 
+// Проверки: 'abba', 'Abba'.
+
 const isPalindrom = function (word) {
   let splitWord = word.split("");
   let reverseArr = splitWord.reverse();
@@ -9,7 +12,7 @@ const isPalindrom = function (word) {
   } else {
     console.log('Слово ' + word + ' не является палиндромом');
   };
-}
+};
 
 isPalindrom('abba');
 isPalindrom('Abba');
