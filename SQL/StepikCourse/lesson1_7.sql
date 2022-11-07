@@ -43,9 +43,10 @@ ORDER BY name, number_plate, violation;
 
 
 -- В таблице fine увеличить в два раза сумму неоплаченных штрафов для отобранных на предыдущем шаге записей. 
+
 UPDATE fine, 
 (SELECT name, number_plate, violation                       -- Здесь мы выбираем в UPDATE еще одну такую же таблицу и даем ей псевдноим, для того, что бы затем сравнивать
-FROM fine                                                   -- значения двух таблиц и по нима осуществлять выборку.
+FROM fine                                                   -- значения двух таблиц и по ним осуществлять выборку.
 GROUP BY name, number_plate, violation
 HAVING COUNT(*) >= 2) query_in
 SET fine.sum_fine = fine.sum_fine * 2
@@ -53,3 +54,24 @@ WHERE fine.date_payment IS NULL AND
       fine.name = query_in.name AND
       fine.number_plate = query_in.number_plate AND
       fine.violation = query_in.violation;
+
+
+-- Необходимо:
+
+    -- 1. В таблицу fine занести дату оплаты соответствующего штрафа из таблицы payment; 
+    -- 2. Уменьшить начисленный штраф в таблице fine в два раза  (только для тех штрафов, информация о которых занесена в таблицу payment) , если оплата произведена не позднее 20 дней со дня нарушения.
+
+UPDATE fine f, payment p                              -- Если в обновлении участвует несколько таблиц, их все необходимо указать после UPDATE;
+SET f.date_payment = p.date_payment,
+    sum_fine = IF(DATEDIFF(p.date_payment, f.date_violation) <= 20, f.sum_fine / 2, f.sum_fine)
+WHERE (f.name, f.number_plate, f.violation, f.date_violation) = (p.name, p.number_plate, p.violation, p.date_violation);
+
+
+-- Создать новую таблицу back_payment, куда внести информацию о неоплаченных штрафах (Фамилию и инициалы водителя, номер машины, нарушение, сумму штрафа  и  дату нарушения) из таблицы fine.
+
+CREATE TABLE back_payment                                       -- Для создания таблицы на основе другой, после CREATE TABLE делаем простой SELECT с той выборкой, которую
+SELECT name, number_plate, violation, sum_fine, date_violation  -- хотим внести в новую табицу.
+FROM fine
+WHERE date_payment IS NULL;
+
+
