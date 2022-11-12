@@ -68,3 +68,25 @@ FROM author a
 GROUP BY name_author                                -- с помощью который происходит связь с таблицей genre.
 HAVING COUNT(DISTINCT genre_id) = 1               -- Тут с помощью оператора DISTINCT считаем сумму одинаковых значений в поле genre_id. 
 ORDER BY name_author;                             -- Задача найти тех, у кого будет лишь одно уникальное значение, значит этот автор пишет только в одном жанре. Иначе сумма уникальных значений была бы > 1.
+
+
+-- Вывести информацию о книгах (название книги, фамилию и инициалы автора, название жанра, цену и количество экземпляров книги), написанных в самых популярных жанрах, в отсортированном в алфавитном порядке по названию книг виде. Самым популярным считать жанр, общее количество экземпляров книг которого на складе максимально.
+
+SELECT title, name_author, name_genre, price, amount                    
+FROM genre g
+     JOIN book b ON b.genre_id = g.genre_id
+     JOIN author a ON a.author_id = b.author_id
+WHERE g.genre_id IN(SELECT querry_in2.genre_id        -- Находим id самых популярных жанров с помощью подзапроса, в котором джоинем две временные таблицы.
+                   FROM (SELECT genre_id, SUM(amount) AS sum_amount   -- Чтобы их найти эти id сперва необходимо найти один самый популярный жанр и узнать его sum_amount.
+                   FROM book
+                   GROUP BY genre_id
+                   ORDER BY sum_amount DESC
+                   LIMIT 1) querry_in1
+                            JOIN                                            
+                  (SELECT genre_id, SUM(amount) AS sum_amount
+                   FROM book
+                   GROUP BY genre_id) querry_in2 ON querry_in1.sum_amount = querry_in2.sum_amount) -- После чего провести соединения двух таблиц на основании sum_amount
+ORDER BY title;                                                                                    -- и вывести значения id второго джоина. Т. к. мы проводим сравнение на основании sum_amount
+                                                                                                   -- которые в обоих случаях одинаковы, то у нас получается декартово произведение:
+                                                                                                   -- все строки из выборки одной таблицы сопоставляются со всеми строками другой.
+                                                                                                   -- Таким образом в querry_in2 мы получаем все id в которых sum_amount имеют макс. значения.
