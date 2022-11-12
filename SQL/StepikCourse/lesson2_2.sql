@@ -31,4 +31,40 @@ ORDER BY name_city, Дата DESC;                                              
                                                                                                    -- FLOOR() - возвращает наибольшее целое число, меньшее или равное указанному числовому значению.
 
 
--- Next
+-- Next Вывести информацию о книгах (жанр, книга, автор), относящихся к жанру, включающему слово «роман» в отсортированном по названиям книг виде.
+
+SELECT name_genre, title, name_author
+FROM genre g
+     JOIN book b ON b.genre_id = g.genre_id
+     JOIN author a ON a.author_id = b.author_id
+WHERE name_genre LIKE "%роман%"
+ORDER BY title;
+
+
+-- Посчитать количество экземпляров  книг каждого автора из таблицы author.  Вывести тех авторов,  количество книг которых меньше 10, в отсортированном по возрастанию количества виде. Последний столбец назвать Количество.
+
+SELECT name_author, SUM(amount) AS Количество
+FROM author a
+     LEFT JOIN book b ON b.author_id = a.author_id
+GROUP BY name_author
+HAVING SUM(amount) < 10 OR SUM(amount) IS NULL       -- Т.к. в операторе сравнение NULL не учитывается, нужно указать для него дополнительное условие после OR.
+ORDER BY Количество;
+
+            ---- Второй вариант ----
+
+SELECT name_author, SUM(amount) AS Количество
+FROM author a
+     LEFT JOIN book b ON b.author_id = a.author_id
+GROUP BY name_author
+HAVING IFNULL(SUM(amount), 0) < 10                    -- Используем функцию IFNULL, которая возвращает заданное значение, если выражение равно NULL.
+ORDER BY Количество;
+
+
+-- Вывести в алфавитном порядке всех авторов, которые пишут только в одном жанре.
+
+SELECT name_author                               
+FROM author a
+     JOIN book b ON b.author_id = a.author_id       -- Достаточно связать 2 таблицы, т. к. нам не обязательны названия жанров, достаточны лишь их ID из колонки genre_id
+GROUP BY name_author                                -- с помощью который происходит связь с таблицей genre.
+HAVING COUNT(DISTINCT genre_id) = 1               -- Тут с помощью оператора DISTINCT считаем сумму одинаковых значений в поле genre_id. 
+ORDER BY name_author;                             -- Задача найти тех, у кого будет лишь одно уникальное значение, значит этот автор пишет только в одном жанре. Иначе сумма уникальных значений была бы > 1.
