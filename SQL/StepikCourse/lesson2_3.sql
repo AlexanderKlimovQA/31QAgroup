@@ -9,7 +9,6 @@ SET b.price = (b.price*b.amount+s.price*s.amount)/(b.amount+s.amount),          
 WHERE b.price != s.price;                                                       -- таблиц, можно будет использовать столбцы из таблиц book, authorи supply. 
 
 SELECT * FROM book;
-
 SELECT * FROM supply;
 
 
@@ -87,3 +86,53 @@ WHERE title = 'Остров сокровищ' AND name_author = 'Стивенс�
 SELECT title, name_author, book.author_id, genre_id 
 FROM book 
      JOIN author ON author.author_id = book.author_id;
+
+
+-- Удалить всех авторов и все их книги, общее количество книг которых меньше 20.
+
+DELETE FROM author
+WHERE author_id IN(SELECT author_id              -- Т.к. в таблицах book и author ID авторов совпадают, то джоины тут не нужны. Достаточно найти в подзапросе ID нужных нам авторов
+                   FROM book                     -- из таблицы book и включить их в условия выборки удаления в основном запросе.
+                   GROUP BY author_id
+                   HAVING SUM(amount) < 20);
+                   
+SELECT * FROM author;
+SELECT * FROM book;
+
+
+-- Удалить все жанры, к которым относится меньше 4-х книг. В таблице book для этих жанров установить значение Null.
+
+DELETE FROM genre
+WHERE genre_id IN(SELECT genre_id
+                  FROM book
+                  GROUP BY genre_id
+                  HAVING  COUNT(title) < 4);
+                  
+SELECT * FROM genre;
+SELECT * FROM book;
+
+
+-- Удалить всех авторов, которые пишут в жанре "Поэзия". Из таблицы book удалить все книги этих авторов. В запросе для отбора авторов использовать полное название жанра, а не его id.
+
+DELETE FROM a
+            USING author a
+            JOIN book b ON b.author_id = a.author_id
+            JOIN genre g ON g.genre_id = b.genre_id
+WHERE name_genre = 'Поэзия';
+
+SELECT * FROM author;
+SELECT * FROM book;
+
+
+-- Удалить авторов, сумма стоимости книг которых больше 1220
+
+DELETE FROM author
+WHERE author_id IN(
+                    SELECT author_id
+                    FROM book
+                    GROUP BY author_id
+                    HAVING SUM(price) > 1220
+                   );
+                   
+SELECT * FROM author;
+SELECT * FROM book;
