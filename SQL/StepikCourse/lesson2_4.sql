@@ -35,3 +35,45 @@ ORDER BY Количество DESC, name_city;
 SELECT buy_id, date_step_end
 FROM buy_step
 WHERE step_id = 1 AND date_step_end IS NOT NULL
+
+
+-- Вывести информацию о каждом заказе: его номер, кто его сформировал (фамилия пользователя) и его стоимость (сумма произведений количества заказанных книг и их цены), в отсортированном по номеру заказа виде. Последний столбец назвать Стоимость.
+
+SELECT b.buy_id, name_client, SUM(price*bb.amount) AS Стоимость
+FROM buy b
+     JOIN client c ON c.client_id = b.client_id
+     JOIN buy_book bb ON bb.buy_id = b.buy_id
+     JOIN book ON book.book_id = bb.book_id
+GROUP BY b.buy_id, name_client
+ORDER BY b.buy_id;
+
+
+-- Вывести номера заказов (buy_id) и названия этапов,  на которых они в данный момент находятся. Если заказ доставлен –  информацию о нем не выводить. Информацию отсортировать по возрастанию buy_id.
+
+SELECT b.buy_id, name_step
+FROM buy b
+     JOIN buy_step bs ON bs.buy_id = b.buy_id
+     JOIN step s ON s.step_id = bs.step_id
+WHERE date_step_beg IS NOT NULL AND date_step_end IS NULL;
+
+
+-- В таблице city для каждого города указано количество дней, за которые заказ может быть доставлен в этот город (рассматривается только этап "Транспортировка"). Для тех заказов, которые прошли этап транспортировки, вывести количество дней за которое заказ реально доставлен в город. А также, если заказ доставлен с опозданием, указать количество дней задержки, в противном случае вывести 0. В результат включить номер заказа (buy_id), а также вычисляемые столбцы Количество_дней и Опоздание. Информацию вывести в отсортированном по номеру заказа виде.
+
+SELECT b.buy_id, DATEDIFF(date_step_end, date_step_beg) AS Количество_дней, IF(DATEDIFF(date_step_end, date_step_beg) > days_delivery, DATEDIFF(date_step_end, date_step_beg) - days_delivery, 0) AS Опоздание
+FROM city c
+     JOIN client cl ON cl.city_id = c.city_id
+     JOIN buy b ON b.client_id = cl.client_id
+     JOIN buy_step bs ON bs.buy_id = b.buy_id
+     JOIN step s ON s.step_id = bs.step_id
+WHERE name_step = 'Транспортировка' AND date_step_end IS NOT NULL
+ORDER BY b.buy_id;
+
+     ----- Второй вариант с использованием функции GREATEST() вместо IF() -----
+SELECT b.buy_id, DATEDIFF(date_step_end, date_step_beg) AS Количество_дней, GREATEST(DATEDIFF(date_step_end, date_step_beg) - days_delivery, 0) AS Опоздание
+FROM city c
+     JOIN client cl ON cl.city_id = c.city_id             -- GREATEST выполняет математическое вычисление указанное в первом условии, и если его результат больше, чем условия указанное после запятой
+     JOIN buy b ON b.client_id = cl.client_id             -- (в данном случае "0"), то возвращает полученный результат. Если результат меньше указанного условия, то возвращает
+     JOIN buy_step bs ON bs.buy_id = b.buy_id             -- число, равное этому условия. В данном запросе если заказ пришел вовремя или быстрее, то при вычитании у нас получается отрицательное число
+     JOIN step s ON s.step_id = bs.step_id                -- которое приравняется к "0". Если заказ пришел с опозданием, то вернется кол-во дней, на которое он опоздал.
+WHERE name_step = 'Транспортировка' AND date_step_end IS NOT NULL
+ORDER BY b.buy_id;
