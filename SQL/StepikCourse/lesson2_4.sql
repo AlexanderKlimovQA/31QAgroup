@@ -77,3 +77,30 @@ FROM city c
      JOIN step s ON s.step_id = bs.step_id                -- которое приравняется к "0". Если заказ пришел с опозданием, то вернется кол-во дней, на которое он опоздал.
 WHERE name_step = 'Транспортировка' AND date_step_end IS NOT NULL
 ORDER BY b.buy_id;
+
+
+-- Выбрать всех клиентов, которые заказывали книги Достоевского, информацию вывести в отсортированном по алфавиту виде. В решении используйте фамилию автора, а не его id.
+
+SELECT DISTINCT name_client
+FROM client c
+     JOIN buy ON buy.client_id = c.client_id
+     JOIN buy_book bb ON bb.buy_id = buy.buy_id
+     JOIN book b ON b.book_id = bb.book_id
+     JOIN author a ON a.author_id = b.author_id
+WHERE name_author LIKE "Достоевский%"
+ORDER BY name_client;
+
+
+-- Вывести жанр (или жанры), в котором было заказано больше всего экземпляров книг, указать это количество. Последний столбец назвать Количество.
+
+SELECT name_genre, SUM(bb.amount) AS Количество
+FROM genre g
+    JOIN book b ON b.genre_id = g.genre_id
+    JOIN buy_book bb ON bb.book_id = b.book_id
+GROUP BY name_genre
+HAVING SUM(bb.amount) >= ALL(
+    SELECT SUM(bb.amount) AS sum_amount
+    FROM book b
+    JOIN buy_book bb ON bb.book_id = b.book_id
+    GROUP BY genre_id
+    );
