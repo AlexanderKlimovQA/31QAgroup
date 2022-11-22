@@ -104,3 +104,20 @@ HAVING SUM(bb.amount) >= ALL(
     JOIN buy_book bb ON bb.book_id = b.book_id
     GROUP BY genre_id
     );
+
+
+-- Сравнить ежемесячную выручку от продажи книг за текущий и предыдущий годы. Для этого вывести год, месяц, сумму выручки в отсортированном сначала по возрастанию месяцев, затем по возрастанию лет виде. Название столбцов: Год, Месяц, Сумма.
+
+SELECT YEAR(date_step_end) AS Год, MONTHNAME(date_step_end) AS Месяц, SUM(price*bb.amount) AS Сумма
+FROM book b
+     JOIN buy_book bb ON bb.book_id = b.book_id
+     JOIN buy_step bs ON bs.buy_id = bb.buy_id
+WHERE date_step_end IS NOT NULL AND step_id = 1
+GROUP BY Год, Месяц
+UNION
+SELECT YEAR(date_payment) AS Год, MONTHNAME(date_payment) AS Месяц, SUM(price*amount)
+FROM buy_archive
+GROUP BY Год, Месяц
+ORDER BY Месяц, Год;
+
+
