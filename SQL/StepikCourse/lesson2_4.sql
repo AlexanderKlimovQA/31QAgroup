@@ -121,3 +121,27 @@ GROUP BY Год, Месяц
 ORDER BY Месяц, Год;
 
 
+-- Для каждой отдельной книги необходимо вывести информацию о количестве проданных экземпляров и их стоимости за 2020 и 2019 год . Вычисляемые столбцы назвать Количество и Сумма. Информацию отсортировать по убыванию стоимости.
+
+SELECT title, SUM(amount) AS Количество, SUM(amount * price) AS Сумма    -- Делать группировку в подзапросе в данном случае нет смысла, т. к. в итоге в основном запросе все равно все 
+FROM (SELECT title, bb.amount, price                                     -- полученные строки из обеих таблиц будут группироваться по title
+     FROM book b
+          JOIN buy_book bb ON bb.book_id = b.book_id
+          JOIN buy_step bs ON bs.buy_id = bb.buy_id 
+     WHERE step_id = 1 AND date_step_end IS NOT NULL
+     UNION ALL                                                           -- Тут нужно использовать UNION ALL, чтобы все строки попали в основной запрос, иначе полностью одинаковые строки сократятся
+     SELECT title, ba.amount, ba.price                                   -- и мы получим не точный результат во внешнем запросе, так как, к примеру в таблице buy_archive
+     FROM buy_archive ba                                                 -- есть две строки у которых одинаковы title, ba.amount, ba.price. В итоге эти строки сократятся до одной,
+          JOIN book b ON b.book_id = ba.book_id) AS query_in             -- и вместо ba.amount = 4 он будет = 2. В итоге при группировке во внешнем запросе у нас пропадет 2 книги из отчетности.
+GROUP BY title
+ORDER BY Сумма DESC;
+
+
+-- Вывести названия книг, которые ни разу не были заказаны, отсортировав в алфавитном порядке.
+
+SELECT title
+FROM book b
+     LEFT JOIN buy_book bb ON bb.book_id = b.book_id
+     LEFT JOIN buy_step bs ON bs.buy_id = bb.buy_id
+WHERE step_id IS NULL
+ORDER BY title;
