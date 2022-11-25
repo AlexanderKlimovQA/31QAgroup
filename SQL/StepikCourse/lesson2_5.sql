@@ -68,3 +68,52 @@ WHERE buy_id = 5
 ORDER BY title;
 
 SELECT * FROM buy_pay;
+
+
+-- Создать общий счет (таблицу buy_pay) на оплату заказа с номером 5. Куда включить номер заказа, количество книг в заказе (название столбца Количество) и его общую стоимость (название столбца Итого).  Для решения используйте ОДИН запрос.
+
+CREATE TABLE buy_pay                                                            -- Группировку использовать не обязательно, т.к. в столбце buy_id у нас одинаковые значения равные 5.
+SELECT buy_id, SUM(bb.amount) AS Количество, SUM(bb.amount*price) AS Итого      -- В таком случае у нас группа образуется изначально без GROUP BY при использовании агрегатных функций,
+FROM book b                                                                     -- в данном случае SUN().
+     JOIN buy_book bb ON bb.book_id = b.book_id
+WHERE buy_id = 5;
+
+SELECT * from buy_pay;
+
+
+-- В таблицу buy_step для заказа с номером 5 включить все этапы из таблицы step, которые должен пройти этот заказ. В столбцы date_step_beg и date_step_end всех записей занести Null.
+
+INSERT INTO buy_step (buy_id, step_id, date_step_beg, date_step_end)
+SELECT DISTINCT buy_id, step_id, NULL, NULL
+FROM step, buy_book
+WHERE buy_id = 5;
+
+SELECT * FROM buy_step;
+
+
+-- В таблицу buy_step занести дату 12.04.2020 выставления счета на оплату заказа с номером 5.
+-- Правильнее было бы занести не конкретную, а текущую дату. Это можно сделать с помощью функции Now(). Но при этом в разные дни будут вставляться разная дата, и задание нельзя будет проверить, поэтому  вставим дату 12.04.2020.
+
+UPDATE buy_step
+SET date_step_beg = '2020-04-12'
+WHERE buy_id = 5 AND step_id = 1;
+
+SELECT * FROM buy_step;
+
+
+-- Завершить этап «Оплата» для заказа с номером 5, вставив в столбец date_step_end дату 13.04.2020, и начать следующий этап («Упаковка»), задав в столбце date_step_beg для этого этапа ту же дату.
+-- Реализовать два запроса для завершения этапа и начала следующего. Они должны быть записаны в общем виде, чтобы его можно было применять для любых этапов, изменив только текущий этап. Для примера пусть это будет этап «Оплата».
+
+UPDATE buy_step
+SET date_step_end = '2020-04-13'
+WHERE buy_id = 5 AND step_id = 1;
+
+UPDATE buy_step 
+SET date_step_beg = '2020-04-13'
+WHERE buy_id = 5 AND step_id = (SELECT step_id+1
+                                   FROM step
+                                   WHERE name_step = 'Оплата');
+
+SELECT * FROM buy_step
+
+
