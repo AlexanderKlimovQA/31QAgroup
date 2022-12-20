@@ -22,3 +22,36 @@ ORDER BY RAND()
 LIMIT 3;
 
 SELECT * FROM testing;
+
+
+-- Студент прошел тестирование (то есть все его ответы занесены в таблицу testing), далее необходимо вычислить результат(запрос) и занести его в таблицу attempt для соответствующей попытки.  Результат попытки вычислить как количество правильных ответов, деленное на 3 (количество вопросов в каждой попытке) и умноженное на 100. Результат округлить до целого.
+
+-- Будем считать, что мы знаем id попытки,  для которой вычисляется результат, в нашем случае это 8.
+
+UPDATE attempt
+SET result = (SELECT SUM(is_correct) / 3 * 100
+              FROM testing t JOIN
+              answer a ON a.answer_id = t.answer_id
+              WHERE attempt_id = 8)
+WHERE attempt_id = 8;
+              
+SELECT * FROM attempt;
+
+
+-- Удалить из таблицы attempt все попытки, выполненные раньше 1 мая 2020 года. Также удалить и все соответствующие этим попыткам вопросы из таблицы testing, которая создавалась следующим запросом:
+
+CREATE TABLE testing (
+    testing_id INT PRIMARY KEY AUTO_INCREMENT, 
+    attempt_id INT, 
+    question_id INT, 
+    answer_id INT,
+    FOREIGN KEY (attempt_id)  REFERENCES attempt (attempt_id) ON DELETE CASCADE
+);
+
+-- Решение
+
+DELETE FROM attempt
+WHERE date_attempt < '2020-05-01';
+
+SELECT * FROM attempt;
+SELECT * FROM testing;
