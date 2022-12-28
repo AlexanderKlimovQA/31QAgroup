@@ -78,3 +78,27 @@ ORDER BY name_program;
 
 -- Посчитать количество баллов каждого абитуриента на каждую образовательную программу, на которую он подал заявление, по результатам ЕГЭ. В результат включить название образовательной программы, фамилию и имя абитуриента, а также столбец с суммой баллов, который назвать itog. Информацию вывести в отсортированном сначала по образовательной программе, а потом по убыванию суммы баллов виде.
 
+SELECT name_program, name_enrollee, SUM(result) AS itog
+FROM enrollee e JOIN
+    program_enrollee pe ON e.enrollee_id = pe.enrollee_id JOIN
+    program p ON p.program_id = pe.program_id JOIN
+    program_subject ps ON p.program_id = ps.program_id JOIN
+    subject s ON s.subject_id = ps.subject_id JOIN
+    enrollee_subject es ON e.enrollee_id = es.enrollee_id AND s.subject_id = es.subject_id
+GROUP BY name_enrollee, name_program
+ORDER BY name_program, itog DESC;
+
+
+-- Вывести название образовательной программы и фамилию тех абитуриентов, которые подавали документы на эту образовательную программу, но не могут быть зачислены на нее. Эти абитуриенты имеют результат по одному или нескольким предметам ЕГЭ, необходимым для поступления на эту образовательную программу, меньше минимального балла. Информацию вывести в отсортированном сначала по программам, а потом по фамилиям абитуриентов виде.
+
+-- Например, Баранов Павел по «Физике» набрал 41 балл, а  для образовательной программы «Прикладная механика» минимальный балл по этому предмету определен в 45 баллов. Следовательно, абитуриент на данную программу не может поступить.
+
+SELECT  name_program, name_enrollee
+FROM program p JOIN
+    program_enrollee pe ON p.program_id = pe.program_id JOIN
+    enrollee e ON e.enrollee_id = pe.enrollee_id JOIN
+    enrollee_subject es ON e.enrollee_id = es.enrollee_id JOIN
+    subject s ON s.subject_id = es.subject_id JOIN
+    program_subject ps ON s.subject_id = ps.subject_id AND p.program_id = ps.program_id
+WHERE result < min_result
+ORDER BY name_program, name_enrollee;
