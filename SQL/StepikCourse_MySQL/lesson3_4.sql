@@ -11,3 +11,11 @@ ORDER BY program_id, itog DESC;
 
 -- Из таблицы applicant, созданной на предыдущем шаге, удалить записи, если абитуриент на выбранную образовательную программу не набрал минимального балла хотя бы по одному предмету.
 
+DELETE FROM a
+USING
+    applicant a JOIN
+    program_subject ps ON a.program_id = ps.program_id JOIN
+    enrollee_subject es ON a.enrollee_id = es.enrollee_id AND es.subject_id = ps.subject_id
+WHERE result < min_result AND a.program_id = ps.program_id;
+    
+SELECT * FROM applicant;
