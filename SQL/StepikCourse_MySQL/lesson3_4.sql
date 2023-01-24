@@ -19,3 +19,39 @@ USING
 WHERE result < min_result AND a.program_id = ps.program_id;
     
 SELECT * FROM applicant;
+
+
+-- Повысить итоговые баллы абитуриентов в таблице applicant на значения дополнительных баллов (использовать запрос из предыдущего урока).
+
+UPDATE
+applicant a JOIN
+(SELECT enrollee_id, SUM(bonus) AS sum_bonus
+FROM achievement a JOIN
+     enrollee_achievement ea ON a.achievement_id = ea.achievement_id
+GROUP BY enrollee_id) AS sum ON a.enrollee_id = sum.enrollee_id
+SET itog = itog + sum_bonus;
+
+SELECT * FROM applicant;
+
+
+-- Поскольку при добавлении дополнительных баллов, абитуриенты по каждой образовательной программе могут следовать не в порядке убывания суммарных баллов, необходимо создать новую таблицу applicant_order на основе таблицы applicant. При создании таблицы данные нужно отсортировать сначала по id образовательной программы, потом по убыванию итогового балла. А таблицу applicant, которая была создана как вспомогательная, необходимо удалить.
+
+CREATE TABLE applicant_order AS
+SELECT *
+FROM applicant
+ORDER BY program_id, itog DESC;
+
+SELECT * FROM applicant_order;
+
+DROP TABLE applicant;
+
+
+-- Включить в таблицу applicant_order новый столбец str_id целого типа , расположить его перед первым.
+
+ALTER TABLE applicant_order ADD str_id INT FIRST;
+
+SELECT * FROM applicant_order;
+
+
+-- Занести в столбец str_id таблицы applicant_order нумерацию абитуриентов, которая начинается с 1 для каждой образовательной программы.
+
