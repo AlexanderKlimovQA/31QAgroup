@@ -55,3 +55,10 @@ SELECT * FROM applicant_order;
 
 -- Занести в столбец str_id таблицы applicant_order нумерацию абитуриентов, которая начинается с 1 для каждой образовательной программы.
 
+SET @row_num := 0;                  -- Способ объявления переменной в SQL
+SET @pr_num := 1;
+
+UPDATE applicant_order
+SET str_id = IF(program_id = @pr_num, @row_num := @row_num + 1, @row_num := 1 AND @pr_num := @pr_num + 1);  -- Применение переменных для нумерации строк.
+
+SELECT * FROM applicant_order;
