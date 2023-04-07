@@ -1,6 +1,0 @@
-ID:
-Title:
-Pre-conditions:
-STR:
-ER:
-Status:
