@@ -124,3 +124,17 @@ WHERE my_rating > 6;
 SELECT *
 FROM films
 WHERE MOD(id, 2) = 0;
+
+-- Посмотреть сколько лет фильмам от самых старых к новым
+SELECT 
+	film_name_rus, 
+	film_name_orig,
+	YEAR(current_date) - YEAR(release_date) AS Возраст_фильма
+FROM films
+ORDER BY Возраст_фильма DESC;
+
+-- Найти все фильмы с самым высоким рейтингом (подзапрос)
+SELECT *
+FROM films
+WHERE my_rating = (SELECT MAX(my_rating)
+					FROM films);
