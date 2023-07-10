@@ -3,7 +3,8 @@
 		"_postman_id": "87626ab6-c185-4475-98e4-855fc604607c",
 		"name": "31_QA_GR_HW_1",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "20767005"
+		"_exporter_id": "20767005",
+		"_collection_link": "https://grey-meteor-144624.postman.co/workspace/Test-Workspace~f99e5e83-867b-4942-8d10-b54068b0705e/collection/20767005-87626ab6-c185-4475-98e4-855fc604607c?action=share&creator=20767005&source=collection_link"
 	},
 	"item": [
 		{
@@ -342,7 +343,7 @@
 					]
 				},
 				"url": {
-					"raw": "http://162.55.220.72:5007/user_info_2",
+					"raw": "http://162.55.220.72:5005/user_info_2",
 					"protocol": "http",
 					"host": [
 						"162",
@@ -350,7 +351,7 @@
 						"220",
 						"72"
 					],
-					"port": "5007",
+					"port": "5005",
 					"path": [
 						"user_info_2"
 					]
