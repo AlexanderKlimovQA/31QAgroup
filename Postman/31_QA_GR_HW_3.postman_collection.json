@@ -186,8 +186,7 @@
 							"let salaryCheck = resp.salary[2] > resp.salary[1] && resp.salary[2] > resp.salary[1];\r",
 							"pm.test('resp.salary[2] > resp.salary[1] AND resp.salary[0] (Второй вариант решения)', () => {\r",
 							"    pm.expect(salaryCheck).to.be.true;\r",
-							"});\r",
-							""
+							"});"
 						],
 						"type": "text/javascript"
 					}
